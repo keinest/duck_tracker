@@ -7,6 +7,7 @@ from app.models.user import User
 from app.models.position import SessionPartage, Position, PointArret
 from app.api.schemas import CreateUserByAdminSchema
 from app.utils.decorators import role_required
+from sqlalchemy import extract
 
 manager_bp = Blueprint('manager', __name__, url_prefix='/api/manager')
 
@@ -149,8 +150,8 @@ def list_sessions():
         query = query.filter(SessionPartage.date_session >= start_week)
     elif periode == 'mois':
         query = query.filter(
-            db.extract('year', SessionPartage.date_session) == today.year,
-            db.extract('month', SessionPartage.date_session) == today.month
+            extract('year', SessionPartage.date_session) == today.year,
+            extract('month', SessionPartage.date_session) == today.month
         )
 
     if tri == 'date_asc':

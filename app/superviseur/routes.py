@@ -3,6 +3,7 @@ from datetime import datetime
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.extensions import db
 from app.models.position import SessionPartage, Position
+from sqlalchemy import extract
 
 from datetime import timedelta
 from math import radians, sin, cos, sqrt, atan2
@@ -115,8 +116,8 @@ def historique():
         query = query.filter(SessionPartage.date_session >= start_week)
     elif periode == 'mois':
         query = query.filter(
-            db.extract('year', SessionPartage.date_session) == today.year,
-            db.extract('month', SessionPartage.date_session) == today.month
+            extract('year', SessionPartage.date_session) == today.year,
+            extract('month', SessionPartage.date_session) == today.month
         )
 
     if tri == 'date_asc':
