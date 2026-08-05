@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DUC Tracker -- Géolocalisation terrain en temps réel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/landing.css') }}">
+</head>
+<body>
+
+<!-- ============ LOADER ============ -->
+<div id="loader">
+  <div class="loader-mark"><i class="fa-solid fa-location-dot"></i></div>
+  <div class="loader-status" id="loaderStatus">Initialisation<span class="dot-cursor">…</span></div>
+  <div class="loader-bar-track"><div class="loader-bar-fill" id="loaderBar"></div></div>
+  <div class="loader-pct" id="loaderPct">0%</div>
+</div>
+
+<!-- ============ HEADER ============ -->
+<header>
+  <nav>
+    <div class="brand">
+      <div class="brand-mark"><i class="fa-solid fa-location-crosshairs"></i></div>
+      DUC <span class="sub">Tracker</span>
+    </div>
+    <div class="nav-links">
+      <a href="#fonctionnalites">Fonctionnalités</a>
+      <a href="#parcours">Parcours</a>
+      <a href="#securite">Sécurité</a>
+      <a href="#architecture">Architecture</a>
+    </div>
+    <div class="nav-cta">
+      <a href="{{ url_for('auth_views.login_page')}}" class="btn btn-ghost btn-sm">Se connecter</a>
+      <a href="{{ url_for('auth_views.register_page')}}" class="btn btn-primary btn-sm">Créer un compte</a>
+    </div>
+  </nav>
+</header>
+
+<!-- ============ HERO ============ -->
+<section class="hero">
+  <div class="container hero-grid">
+    <div>
+      <div class="eyebrow"><span class="live-dot"></span> 22 équipes terrain suivies en direct</div>
+      <h1>La position de vos superviseurs, <span class="accent">en direct, sur le terrain.</span></h1>
+      <p class="hero-sub">DUC Tracker centralise la géolocalisation, l'historique des déplacements et la supervision des équipes terrain d'DUC Cameroun -- une position toutes les 30 à 60 secondes, une visibilité totale pour les managers.</p>
+      <div class="hero-actions">
+        <a href="{{ url_for('auth_views.register_page')}}" class="btn btn-primary">Créer un compte superviseur <i class="fa-solid fa-arrow-right"></i></a>
+        <a href="#parcours" class="btn btn-ghost">Voir comment ça marche</a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat"><b>18</b><span>Superviseurs en ligne</span></div>
+        <div class="stat"><b>41,8 km</b><span>Distance suivie / jour / équipe</span></div>
+        <div class="stat"><b>30-60s</b><span>Fréquence de mise à jour GPS</span></div>
+      </div>
+    </div>
+
+    <div class="signal-card reveal">
+      <div class="signal-badge"><span class="d"></span> Localisation active</div>
+      <div class="signal-grid"></div>
+      <svg class="signal-route" viewBox="0 0 400 420" preserveAspectRatio="none">
+        <path d="M60,340 C 110,300 90,240 150,220 S 230,150 210,110 S 300,90 330,60"
+              fill="none" stroke="#ff7900" stroke-width="2" stroke-opacity="0.55" stroke-dasharray="1 7" stroke-linecap="round"/>
+      </svg>
+      <div class="signal-pins">
+        <div class="pin green" style="top:78%;left:15%;"></div>
+        <div class="pin amber" style="top:52%;left:36%;"></div>
+        <div class="pin grey" style="top:26%;left:52%;"></div>
+        <div class="pin green" style="top:16%;left:80%;"></div>
+      </div>
+      <div class="signal-core"></div>
+      <div class="signal-footer">
+        <div class="signal-row"><span class="label">SUPERVISEUR</span><span class="val">Pierre Martin -- Littoral</span></div>
+        <div class="signal-row"><span class="label">COORDONNÉES</span><span id="coord-ticker">04.0511° N, 09.7679° E</span></div>
+        <div class="signal-row"><span class="label">VITESSE</span><span class="val">45 km/h</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FEATURES ============ -->
+<section id="fonctionnalites">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="section-eyebrow">Fonctionnalités</span>
+      <h2>Tout ce qu'il faut pour piloter des équipes terrain</h2>
+      <p>Conçu pour les réalités du terrain camerounais : couverture réseau variable, déplacements longs, besoin de traçabilité claire pour les managers régionaux et nationaux.</p>
+    </div>
+    <div class="features-grid reveal">
+      <div class="feature">
+        <div class="feature-icon"><i class="fa-solid fa-location-dot"></i></div>
+        <h3>Localisation GPS temps réel</h3>
+        <p>Position transmise automatiquement toutes les 30 à 60 secondes dès que le partage est activé.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
+        <h3>Historique des déplacements</h3>
+        <p>Retrouvez chaque trajet par jour, semaine ou mois, avec durée, distance et vitesse moyenne.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon"><i class="fa-solid fa-route"></i></div>
+        <h3>Détail des trajets</h3>
+        <p>Visualisez le tracé complet sur carte, segment par segment, avec les points d'arrêt détectés.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon"><i class="fa-solid fa-signal"></i></div>
+        <h3>Statuts en direct</h3>
+        <p>En ligne, inactif ou hors ligne -- calculé automatiquement selon la dernière position reçue.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon"><i class="fa-solid fa-users-gear"></i></div>
+        <h3>Gestion des utilisateurs</h3>
+        <p>Créez et gérez les comptes superviseurs et managers, par région ou à l'échelle nationale.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon"><i class="fa-solid fa-shield-halved"></i></div>
+        <h3>Sécurité des données</h3>
+        <p>Authentification chiffrée, rôles stricts, et données hébergées sur infrastructure cloud sécurisée.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PARCOURS ============ -->
+<section id="parcours">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="section-eyebrow">Deux parcours, un seul outil</span>
+      <h2>Pensé pour le terrain comme pour le pilotage</h2>
+      <p>Le superviseur partage sa position en quelques secondes. Le manager visualise toutes ses équipes sur une seule carte, en temps réel.</p>
+    </div>
+    <div class="parcours-grid">
+      <div class="parcours-card reveal">
+        <div class="parcours-top">
+          <div class="parcours-icon"><i class="fa-solid fa-person-walking-arrow-right"></i></div>
+          <span class="parcours-tag">Application mobile</span>
+        </div>
+        <h3>Parcours Superviseur</h3>
+        <p>Une app simple, pensée pour être utilisée d'une main, sur le terrain.</p>
+        <ul class="parcours-list">
+          <li><i class="fa-solid fa-check"></i> Connexion sécurisée en quelques secondes</li>
+          <li><i class="fa-solid fa-check"></i> Partage de position activable/désactivable à tout moment</li>
+          <li><i class="fa-solid fa-check"></i> Historique personnel des trajets, jour par jour</li>
+          <li><i class="fa-solid fa-check"></i> Profil et informations personnelles modifiables</li>
+        </ul>
+      </div>
+      <div class="parcours-card highlight reveal">
+        <div class="parcours-top">
+          <div class="parcours-icon"><i class="fa-solid fa-chart-line"></i></div>
+          <span class="parcours-tag">Tableau de bord web</span>
+        </div>
+        <h3>Parcours Manager</h3>
+        <p>Une vision d'ensemble claire, région par région, ou à l'échelle nationale.</p>
+        <ul class="parcours-list">
+          <li><i class="fa-solid fa-check"></i> Tableau de bord : actifs, inactifs, hors ligne en un coup d'œil</li>
+          <li><i class="fa-solid fa-check"></i> Carte multi-superviseurs mise à jour en temps réel</li>
+          <li><i class="fa-solid fa-check"></i> Historique détaillé par superviseur, avec points d'arrêt</li>
+          <li><i class="fa-solid fa-check"></i> Gestion des rôles et des comptes utilisateurs</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SECURITE / ARCHITECTURE ============ -->
+<section id="securite">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="section-eyebrow">Sécurité &amp; architecture</span>
+      <h2>Une infrastructure pensée pour la confidentialité des données terrain</h2>
+    </div>
+    <div class="sec-wrap reveal" id="architecture">
+      <ul class="sec-list">
+        <li>
+          <span class="num">01</span>
+          <div><strong>Authentification chiffrée</strong><span>Mots de passe hashés, sessions protégées par jetons à durée de vie limitée.</span></div>
+        </li>
+        <li>
+          <span class="num">02</span>
+          <div><strong>Rôles et permissions strictes</strong><span>Un manager régional ne voit que sa région ; seuls les rôles habilités créent des comptes managers.</span></div>
+        </li>
+        <li>
+          <span class="num">03</span>
+          <div><strong>Transmission sécurisée</strong><span>Toutes les données circulent en HTTPS entre l'application et l'API.</span></div>
+        </li>
+        <li>
+          <span class="num">04</span>
+          <div><strong>Données hébergées et sauvegardées</strong><span>Base de données dédiée, hébergée sur infrastructure cloud, avec sauvegardes régulières.</span></div>
+        </li>
+      </ul>
+      <div class="stack-panel">
+        <h4>Flux technique</h4>
+        <div class="stack-flow">
+          <div class="stack-node"><i class="fa-solid fa-mobile-screen"></i><span class="name">Application</span><span class="desc">Interface superviseur &amp; manager</span></div>
+          <div class="stack-node"><i class="fa-solid fa-cloud"></i><span class="name">API REST sécurisée</span><span class="desc">Flask · JWT · Rôles</span></div>
+          <div class="stack-node"><i class="fa-solid fa-database"></i><span class="name">Base de données</span><span class="desc">MySQL</span></div>
+          <div class="stack-node"><i class="fa-solid fa-map-location-dot"></i><span class="name">Cartographie</span><span class="desc">Service de cartographie</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CTA ============ -->
+<section>
+  <div class="container">
+    <div class="cta-band reveal">
+      <div>
+        <h2>Prêt à suivre vos équipes terrain ?</h2>
+        <p>Créez un compte superviseur en moins de deux minutes.</p>
+      </div>
+      <div class="cta-actions">
+        <a href="{{ url_for('auth_views.register_page')}}" class="btn btn-primary">Créer un compte</a>
+        <a href="{{ url_for('auth_views.login_page')}}" class="btn btn-ghost">Se connecter</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="container">
+    <div class="footer-top">
+      <div class="brand">
+        <div class="brand-mark"><i class="fa-solid fa-location-crosshairs"></i></div>
+        DUC <span class="sub">Tracker</span>
+      </div>
+      <div class="footer-cols">
+        <div class="footer-col">
+          <h5>Produit</h5>
+          <a href="#fonctionnalites">Fonctionnalités</a>
+          <a href="#parcours">Parcours</a>
+          <a href="#securite">Sécurité</a>
+        </div>
+        <div class="footer-col">
+          <h5>Compte</h5>
+          <a href="{{ url_for('auth_views.login_page')}}">Se connecter</a>
+          <a href="{{ url_for('auth_views.register_page')}}">Créer un compte</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 DUC Cameroun -- Tracker</span>
+      <span>Vous rapprocher de l'essentiel.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // ---------- LOADER SEQUENCE ----------
+  (function(){
+    const statusEl = document.getElementById('loaderStatus');
+    const barEl = document.getElementById('loaderBar');
+    const pctEl = document.getElementById('loaderPct');
+    const loader = document.getElementById('loader');
+
+    const steps = [
+      "Initialisation de l'application…",
+      "Connexion sécurisée établie…",
+      "Chargement des données terrain…",
+      "Synchronisation des positions GPS…",
+      "Prêt."
+    ];
+
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (reduced) {
+      loader.classList.add('hidden');
+  } else {
+      let progress = 0;
+      let stepIndex = 0;
+      statusEl.textContent = steps[0];
+
+      const interval = setInterval(() => {
+        progress += Math.random() * 9 + 4;
+        if (progress >= 100) progress = 100;
+        barEl.style.width = progress + '%';
+        pctEl.textContent = Math.floor(progress) + '%';
+
+        const expectedStep = Math.min(steps.length - 1, Math.floor((progress / 100) * steps.length));
+        if (expectedStep !== stepIndex) {
+          stepIndex = expectedStep;
+          statusEl.textContent = steps[stepIndex];
+      }
+
+        if (progress >= 100) {
+          clearInterval(interval);
+          setTimeout(() => loader.classList.add('hidden'), 380);
+      }
+    }, 140);
+  }
+})();
+
+  // ---------- COORDINATE TICKER ----------
+  (function(){
+    const el = document.getElementById('coord-ticker');
+    if (!el) return;
+    const baseLat = 4.0511, baseLng = 9.7679;
+    setInterval(() => {
+      const lat = (baseLat + (Math.random() - 0.5) * 0.004).toFixed(4);
+      const lng = (baseLng + (Math.random() - 0.5) * 0.004).toFixed(4);
+      el.textContent = `0${lat}° N, 0${lng}° E`;
+  }, 2200);
+})();
+
+  // ---------- SCROLL REVEAL ----------
+  (function(){
+    const items = document.querySelectorAll('.reveal');
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('in');
+          io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.15});
+    items.forEach(i => io.observe(i));
+})();
+</script>
+
+</body>
+</html>

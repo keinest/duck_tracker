@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Connexion -- DUC Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+</head>
+<body>
+
+<a href="{{ url_for('main.landing') }}" class="back-home">
+  <i class="fa-solid fa-arrow-left"></i> Retour à l'accueil
+</a>
+
+<div class="auth-page">
+  <div class="auth-card">
+
+    <div class="auth-logo"><i class="fa-solid fa-location-crosshairs"></i></div>
+
+    <div class="auth-card-head">
+      <h2>Bienvenue</h2>
+      <p>Connectez-vous pour accéder à votre espace</p>
+    </div>
+
+    <div class="form-alert" id="formAlert"></div>
+
+    <form id="loginForm" novalidate>
+      <div class="field" data-field="telephone">
+        <label for="telephone">Numéro de téléphone</label>
+        <div class="field-input">
+          <i class="fa-solid fa-phone icon-left"></i>
+          <input type="tel" id="telephone" name="telephone" placeholder="Entrez votre identifiant" required autocomplete="tel">
+        </div>
+        <div class="field-error"></div>
+      </div>
+
+      <div class="field" data-field="mot_de_passe">
+        <label for="mot_de_passe">Mot de passe</label>
+        <div class="field-input">
+          <i class="fa-solid fa-lock icon-left"></i>
+          <input type="password" id="mot_de_passe" name="mot_de_passe" placeholder="Entrez votre mot de passe" required autocomplete="current-password" style="padding-right:48px;">
+          <button type="button" class="toggle-pass" aria-label="Afficher le mot de passe">
+            <i class="fa-solid fa-eye"></i>
+          </button>
+        </div>
+        <div class="field-error"></div>
+      </div>
+
+      <button type="submit" class="auth-submit" id="submitBtn">
+        <span class="spinner"></span>
+        <span class="btn-text">Se connecter</span>
+      </button>
+    </form>
+
+    <a href="#" class="forgot-link">Mot de passe oublié ?</a>
+
+    <div class="auth-below">
+      Pas encore de compte ? <a href="{{ url_for('auth_views.register_page') }}">Créer un compte</a>
+    </div>
+  </div>
+</div>
+
+<div class="version-tag">v1.0.0</div>
+
+<script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+</body>
+</html>

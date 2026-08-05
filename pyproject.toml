@@ -1,0 +1,6 @@
+[project]
+name = "orange-field-tracker"
+version = "1.0.0"
+
+[tool.vercel]
+entrypoint = "run:app"

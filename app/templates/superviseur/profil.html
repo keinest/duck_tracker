@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profil -- Orange Field Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/superviseur.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/profil.css') }}">
+</head>
+<body>
+
+<div class="dashboard-shell">
+  <nav class="side-nav">
+    <div class="side-brand">
+      <div class="mark"><i class="fa-solid fa-location-crosshairs"></i></div>
+      Orange <span class="sub">&nbsp;Field Tracker</span>
+    </div>
+    <a href="{{ url_for('superviseur_views.accueil') }}" class="nav-link"><i class="fa-solid fa-house"></i> Accueil</a>
+    <a href="{{ url_for('superviseur_views.historique') }}" class="nav-link"><i class="fa-solid fa-clock-rotate-left"></i> Historique</a>
+    <a href="{{ url_for('superviseur_views.profil') }}" class="nav-link active"><i class="fa-solid fa-user"></i> Profil</a>
+    <div class="side-nav-footer">
+      <a href="#" id="logoutLinkNav" class="nav-link"><i class="fa-solid fa-arrow-right-from-bracket"></i> Déconnexion</a>
+    </div>
+  </nav>
+
+  <div class="main-area">
+    <header class="topbar">
+      <div><h1>Profil</h1><div class="topbar-sub">Vos informations personnelles</div></div>
+    </header>
+
+    <main class="content">
+
+      <div class="profile-hero card">
+        <div class="avatar" id="avatarInitials">--</div>
+        <div class="profile-hero-info">
+          <h2 id="profileName">--</h2>
+          <span class="role-badge" id="profileRole">--</span>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="card">
+          <div class="card-head">
+            <h3>Informations personnelles</h3>
+            <button class="text-btn" id="editToggle"><i class="fa-solid fa-pen"></i> Modifier</button>
+          </div>
+
+          <form id="profileForm">
+            <div class="info-row">
+              <label>Téléphone</label>
+              <span class="info-static" id="infoTelephone">--</span>
+            </div>
+
+            <div class="info-row">
+              <label for="emailInput">Email</label>
+              <span class="info-static" id="infoEmail">--</span>
+              <input type="email" id="emailInput" class="info-edit" placeholder="email@exemple.com">
+            </div>
+
+            <div class="info-row">
+              <label for="regionInput">Région</label>
+              <span class="info-static" id="infoRegion">--</span>
+              <select id="regionInput" class="info-edit">
+                <option value="Adamaoua">Adamaoua</option>
+                <option value="Centre">Centre</option>
+                <option value="Est">Est</option>
+                <option value="Extrême-Nord">Extrême-Nord</option>
+                <option value="Littoral">Littoral</option>
+                <option value="Nord">Nord</option>
+                <option value="Nord-Ouest">Nord-Ouest</option>
+                <option value="Ouest">Ouest</option>
+                <option value="Sud">Sud</option>
+                <option value="Sud-Ouest">Sud-Ouest</option>
+              </select>
+            </div>
+
+            <div class="info-row">
+              <label>Dernière mise à jour</label>
+              <span class="info-static" id="infoMaj">--</span>
+            </div>
+
+            <div class="form-actions" id="formActions" style="display:none;">
+              <button type="button" class="btn-ghost-sm" id="cancelEdit">Annuler</button>
+              <button type="submit" class="btn-primary-sm" id="saveProfile">
+                <span class="spinner-sm"></span>
+                <span class="btn-text">Enregistrer</span>
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><h3>Sécurité</h3></div>
+
+          <button class="settings-item" id="openPasswordModal">
+            <div class="settings-item-left">
+              <i class="fa-solid fa-lock"></i>
+              <span>Changer le mot de passe</span>
+            </div>
+            <i class="fa-solid fa-chevron-right"></i>
+          </button>
+
+          <button class="settings-item danger" id="logoutBtn">
+            <div class="settings-item-left">
+              <i class="fa-solid fa-arrow-right-from-bracket"></i>
+              <span>Déconnexion</span>
+            </div>
+            <i class="fa-solid fa-chevron-right"></i>
+          </button>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- ============ MODAL CHANGEMENT MOT DE PASSE ============ -->
+<div class="modal-overlay" id="passwordModalOverlay">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3>Changer le mot de passe</h3>
+      <button class="icon-btn" id="closePasswordModal"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <div class="modal-alert" id="passwordAlert"></div>
+
+    <form id="passwordForm">
+      <div class="field" data-field="ancien_mot_de_passe">
+        <label>Mot de passe actuel</label>
+        <input type="password" id="ancienMdp" required>
+        <div class="field-error"></div>
+      </div>
+      <div class="field" data-field="nouveau_mot_de_passe">
+        <label>Nouveau mot de passe</label>
+        <input type="password" id="nouveauMdp" required>
+        <div class="field-error"></div>
+      </div>
+      <div class="field" data-field="confirmation_mdp">
+        <label>Confirmer le nouveau mot de passe</label>
+        <input type="password" id="confirmationMdp" required>
+        <div class="field-error"></div>
+      </div>
+
+      <button type="submit" class="btn-primary-sm full" id="submitPassword">
+        <span class="spinner-sm"></span>
+        <span class="btn-text">Mettre à jour le mot de passe</span>
+      </button>
+    </form>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="{{ url_for('static', filename='js/session-bootstrap.js') }}"></script>
+<script src="{{ url_for('static', filename='js/profil.js') }}"></script>
+</body>
+</html>

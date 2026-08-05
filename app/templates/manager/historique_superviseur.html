@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Historique manager -- DUC Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/superviseur.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/manager.css') }}">
+</head>
+<body>
+
+<div class="dashboard-shell">
+  <nav class="side-nav">
+    <div class="side-brand">
+      <div class="mark"><i class="fa-solid fa-location-crosshairs"></i></div>
+      DUC <span class="sub">Tracker</span>
+    </div>
+    <a href="/manager/dashboard" class="nav-link"><i class="fa-solid fa-chart-simple"></i> Dashboard</a>
+    <a href="/manager/utilisateurs" class="nav-link"><i class="fa-solid fa-users"></i> Utilisateurs</a>
+    <a href="/manager/historique" class="nav-link active"><i class="fa-solid fa-clock-rotate-left"></i> Historique</a>
+    <a href="/manager/carte" class="nav-link"><i class="fa-solid fa-map-location-dot"></i> Carte superviseurs</a>
+    <div class="side-nav-footer">
+      <a href="#" id="logoutLink" class="nav-link"><i class="fa-solid fa-arrow-right-from-bracket"></i> Déconnexion</a>
+    </div>
+  </nav>
+
+  <div class="main-area">
+    <header class="topbar">
+      <div><h1>Historique des trajets</h1><div class="topbar-sub">Visualise les sessions terminées par fenêtre de temps</div></div>
+    </header>
+
+    <main class="content">
+      <div class="filters-bar">
+        <select id="periodeSelect" class="sort-select">
+          <option value="jour">Jour</option>
+          <option value="semaine">Semaine</option>
+          <option value="mois" selected>Mois</option>
+          <option value="tout">Tout</option>
+        </select>
+        <select id="triSelect" class="sort-select">
+          <option value="date_desc">Plus récent</option>
+          <option value="date_asc">Plus ancien</option>
+          <option value="distance">Distance</option>
+        </select>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h3>Trajets terminés</h3>
+          <span class="tag">Résultats</span>
+        </div>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Superviseur</th>
+                <th>Région</th>
+                <th>Date</th>
+                <th>Durée</th>
+                <th>Distance</th>
+                <th>Vitesse max</th>
+              </tr>
+            </thead>
+            <tbody id="sessionTableBody">
+              <tr><td colspan="6" class="empty-cell">Chargement de l'historique...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<div class="drawer-overlay" id="managerDrawerOverlay">
+  <div class="drawer-panel" id="managerDrawerPanel">
+    <div class="drawer-header">
+      <div>
+        <h2 id="managerDrawerTitle">Détail du trajet</h2>
+        <span id="managerDrawerRegion">--</span>
+      </div>
+      <button class="icon-btn" id="managerDrawerClose"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="drawer-body">
+      <div class="map-visual" id="managerDrawerMap" style="height:240px;border-radius:14px;position:relative;">
+        <div id="managerMapCanvas" style="position:absolute;inset:0;"></div>
+        <div class="map-grid"></div>
+        <svg id="managerDrawerRoute" viewBox="0 0 400 300" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%;"></svg>
+      </div>
+      <div class="drawer-stats">
+        <div class="drawer-stat"><i class="fa-solid fa-clock"></i><b id="managerDrawerDuree">--</b><span>Durée</span></div>
+        <div class="drawer-stat"><i class="fa-solid fa-route"></i><b id="managerDrawerDistance">--</b><span>Distance</span></div>
+        <div class="drawer-stat"><i class="fa-solid fa-gauge-high"></i><b id="managerDrawerVitesse">--</b><span>Vitesse max</span></div>
+        <div class="drawer-stat"><i class="fa-solid fa-flag"></i><b id="managerDrawerArrets">--</b><span>Arrêts</span></div>
+      </div>
+      <h3 class="drawer-section-title">Points d'arrêt</h3>
+      <div class="stop-list" id="managerStopList"></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+{% if current_app.config['GOOGLE_MAPS_API_KEY'] %}
+<script src="https://maps.googleapis.com/maps/api/js?key={{ current_app.config['GOOGLE_MAPS_API_KEY'] }}"></script>
+{% endif %}
+<script src="{{ url_for('static', filename='js/session-bootstrap.js') }}"></script>
+<script src="{{ url_for('static', filename='js/manager.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Créer un compte -- Orange Field Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+</head>
+<body>
+
+<a href="{{ url_for('main.landing') }}" class="back-home">
+  <i class="fa-solid fa-arrow-left"></i> Retour à l'accueil
+</a>
+
+<div class="auth-page">
+  <div class="auth-card">
+
+    <div class="auth-logo"><i class="fa-solid fa-location-crosshairs"></i></div>
+
+    <div class="auth-card-head">
+      <h2>Créer un compte</h2>
+      <p>Renseignez vos informations pour commencer</p>
+    </div>
+
+    <div class="form-alert" id="formAlert"></div>
+
+    <form id="registerForm" novalidate>
+      <div class="field-row">
+        <div class="field" data-field="prenom">
+          <label for="prenom">Prénom</label>
+          <div class="field-input">
+            <i class="fa-solid fa-user icon-left"></i>
+            <input type="text" id="prenom" name="prenom" required autocomplete="given-name">
+          </div>
+          <div class="field-error"></div>
+        </div>
+        <div class="field" data-field="nom">
+          <label for="nom">Nom</label>
+          <div class="field-input">
+            <i class="fa-solid fa-user icon-left"></i>
+            <input type="text" id="nom" name="nom" required autocomplete="family-name">
+          </div>
+          <div class="field-error"></div>
+        </div>
+      </div>
+
+      <div class="field" data-field="telephone">
+        <label for="telephone">Numéro de téléphone</label>
+        <div class="field-input">
+          <i class="fa-solid fa-phone icon-left"></i>
+          <input type="tel" id="telephone" name="telephone" placeholder="675 123 456" required autocomplete="tel">
+        </div>
+        <div class="field-hint">Format camerounais, ex : 675123456</div>
+        <div class="field-error"></div>
+      </div>
+
+      <div class="field" data-field="email">
+        <label for="email">Email <span style="color:var(--text-mute);font-weight:400;">(optionnel)</span></label>
+        <div class="field-input">
+          <i class="fa-solid fa-envelope icon-left"></i>
+          <input type="email" id="email" name="email" autocomplete="email">
+        </div>
+        <div class="field-error"></div>
+      </div>
+
+      <div class="field" data-field="region">
+        <label for="region">Région</label>
+        <div class="field-input">
+          <i class="fa-solid fa-map-location-dot icon-left"></i>
+          <select id="region" name="region" required>
+            <option value="" disabled selected>Sélectionnez votre région</option>
+            <option value="Adamaoua">Adamaoua</option>
+            <option value="Centre">Centre</option>
+            <option value="Est">Est</option>
+            <option value="Extrême-Nord">Extrême-Nord</option>
+            <option value="Littoral">Littoral</option>
+            <option value="Nord">Nord</option>
+            <option value="Nord-Ouest">Nord-Ouest</option>
+            <option value="Ouest">Ouest</option>
+            <option value="Sud">Sud</option>
+            <option value="Sud-Ouest">Sud-Ouest</option>
+          </select>
+        </div>
+        <div class="field-error"></div>
+      </div>
+
+      <div class="field" data-field="mot_de_passe">
+        <label for="mot_de_passe">Mot de passe</label>
+        <div class="field-input">
+          <i class="fa-solid fa-lock icon-left"></i>
+          <input type="password" id="mot_de_passe" name="mot_de_passe" placeholder="8 caractères minimum" required autocomplete="new-password" style="padding-right:48px;">
+          <button type="button" class="toggle-pass" aria-label="Afficher le mot de passe">
+            <i class="fa-solid fa-eye"></i>
+          </button>
+        </div>
+        <div class="field-error"></div>
+      </div>
+
+      <div class="field" data-field="confirmation">
+        <label for="confirmation">Confirmer le mot de passe</label>
+        <div class="field-input">
+          <i class="fa-solid fa-lock icon-left"></i>
+          <input type="password" id="confirmation" name="confirmation" placeholder="Ressaisissez votre mot de passe" required autocomplete="new-password" style="padding-right:48px;">
+          <button type="button" class="toggle-pass" aria-label="Afficher le mot de passe">
+            <i class="fa-solid fa-eye"></i>
+          </button>
+        </div>
+        <div class="field-error"></div>
+      </div>
+
+      <button type="submit" class="auth-submit" id="submitBtn">
+        <span class="spinner"></span>
+        <span class="btn-text">Créer mon compte</span>
+      </button>
+    </form>
+
+    <div class="auth-below">
+      Déjà un compte ? <a href="{{ url_for('auth_views.login_page') }}">Se connecter</a>
+    </div>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+</body>
+</html>

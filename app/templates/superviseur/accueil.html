@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Accueil -- DUC Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/superviseur.css') }}">
+</head>
+<body>
+
+<div class="dashboard-shell">
+
+  <!-- ============ NAV (sidebar desktop / bottom nav mobile) ============ -->
+  <nav class="side-nav">
+    <div class="side-brand">
+      <div class="mark"><i class="fa-solid fa-location-crosshairs"></i></div>
+      DUC <span class="sub">&nbsp;Tracker</span>
+    </div>
+
+    <a href="{{ url_for('superviseur_views.accueil') }}" class="nav-link active">
+      <i class="fa-solid fa-house"></i> Accueil
+    </a>
+    <a href="{{ url_for('superviseur_views.historique') }}" class="nav-link">
+      <i class="fa-solid fa-clock-rotate-left"></i> Historique
+    </a>
+    <a href="{{ url_for('superviseur_views.profil') }}" class="nav-link">
+      <i class="fa-solid fa-user"></i> Profil
+    </a>
+
+    <div class="side-nav-footer">
+      <a href="#" id="logoutLink" class="nav-link">
+        <i class="fa-solid fa-arrow-right-from-bracket"></i> Déconnexion
+      </a>
+    </div>
+  </nav>
+
+  <!-- ============ CONTENU ============ -->
+  <div class="main-area">
+    <header class="topbar">
+      <div>
+        <h1 id="greeting">Accueil</h1>
+        <div class="topbar-sub" id="todayDate">--</div>
+      </div>
+      <div class="topbar-actions">
+        <button class="icon-btn"><i class="fa-solid fa-bell"></i></button>
+      </div>
+    </header>
+
+    <main class="content">
+
+      <!-- Ligne stats -->
+      <div class="stats-row">
+        <div class="card status-card mini-stat-card">
+          <div class="status-left">
+            <span class="label">Statut de localisation</span>
+            <div class="status-value">
+              <span class="status-dot" id="statusDot"></span>
+              <span id="statusValue">Localisation inactive</span>
+            </div>
+            <div class="status-sub" id="statusSub">Le partage est désactivé</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="shareToggle">
+            <span class="switch-track"></span>
+          </label>
+        </div>
+
+        <div class="card mini-stat mini-stat-card">
+          <i class="fa-solid fa-route"></i>
+          <b id="statDistance">0,0 km</b>
+          <span>Distance du jour</span>
+        </div>
+
+        <div class="card mini-stat mini-stat-card">
+          <i class="fa-solid fa-gauge-high"></i>
+          <b id="statVitesse">0 km/h</b>
+          <span>Vitesse actuelle</span>
+        </div>
+
+        <div class="card mini-stat mini-stat-card">
+          <i class="fa-solid fa-flag"></i>
+          <b id="statArrets">0</b>
+          <span>Arrêts détectés</span>
+        </div>
+      </div>
+
+      <!-- Carte + session -->
+      <div class="two-col">
+        <div class="card map-card">
+          <div class="map-visual">
+            <div class="map-grid"></div>
+            <div class="map-pin"></div>
+          </div>
+          <div class="map-footer">
+            <span class="coord" id="coordBadge">--, --</span>
+            <span class="badge"><span class="d"></span> <span id="mapBadgeText">Position inactive</span></span>
+          </div>
+        </div>
+
+        <div class="card session-card">
+          <div class="card-head">
+            <h3>Session en cours</h3>
+            <span class="tag">v1.0.0</span>
+          </div>
+          <div class="session-timer-block">
+            <div class="label">Durée de la session</div>
+            <div class="session-timer" id="sessionTimer">00:00:00</div>
+            <div class="session-since" id="sessionSince">--</div>
+          </div>
+          <button class="share-btn start" id="shareBtn">
+            <span class="spinner"></span>
+            <span class="btn-text">Démarrer le partage</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Aperçu semaine + activité -->
+      <div class="two-col">
+        <div class="card">
+          <div class="card-head">
+            <h3>Aperçu de la semaine</h3>
+            <span class="tag">Distance / jour</span>
+          </div>
+          <div class="week-chart" id="weekChart"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <h3>Activité récente</h3>
+          </div>
+          <div class="activity-list" id="activityList">
+            <div class="activity-item">
+              <div class="activity-icon"><i class="fa-solid fa-circle-info"></i></div>
+              <div class="activity-body">
+                <p>Aucune activité pour l'instant</p>
+                <span>Démarrez le partage pour commencer</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="{{ url_for('static', filename='js/session-bootstrap.js') }}"></script>
+<script src="{{ url_for('static', filename='js/superviseur-accueil.js') }}"></script>
+</body>
+</html>
