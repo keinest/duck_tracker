@@ -134,10 +134,28 @@ function stopGeolocation() {
 }
 
 let lastSent = 0;
-async function sendPosition(lat, lng, vitesse) {
+let lastSentCoords = null;
+
+function shouldSendPosition(lat, lng) {
   const now = Date.now();
-  if (now - lastSent < 30000) return;
-  lastSent = now;
+  const timeElapsed = now - lastSent;
+
+  if (timeElapsed >= 10000) return true; // au moins toutes les 10s
+
+  if (lastSentCoords) {
+    const distanceM = haversine(lastSentCoords.lat, lastSentCoords.lng, lat, lng) * 1000;
+    if (distanceM >= 8) return true; // déplacement significatif détecté (>= 8m)
+  }
+
+  return false;
+}
+
+async function sendPosition(lat, lng, vitesse) {
+  if (!shouldSendPosition(lat, lng)) return;
+
+  lastSent = Date.now();
+  lastSentCoords = { lat, lng };
+
   try {
     await authFetch('/api/superviseur/position', {
       method: 'POST',
