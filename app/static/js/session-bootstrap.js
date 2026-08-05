@@ -1,4 +1,3 @@
-// Récupère un cookie par son nom (utilisé pour le cookie CSRF du refresh token)
 function getCookie(name) {
   const value = `; ${document.cookie}`;
   const parts = value.split(`; ${name}=`);
@@ -9,10 +8,7 @@ function getCookie(name) {
 window.APP_TOKEN = null;
 window.APP_USER = null;
 
-// Appelé au chargement de chaque page protégée : régénère un access token
-// à partir du refresh token (cookie httpOnly posé lors du login).
-// Si ça échoue, l'utilisateur n'est pas connecté -> retour à la page de connexion.
-async function bootstrapSession() {
+async function silentRefresh() {
   try {
     const csrf = getCookie('csrf_refresh_token');
     const res = await fetch('/api/auth/refresh', {
@@ -20,29 +16,49 @@ async function bootstrapSession() {
       credentials: 'include',
       headers: csrf ? { 'X-CSRF-TOKEN': csrf } : {}
     });
-    if (!res.ok) throw new Error('refresh échoué');
+    if (!res.ok) return false;
     const data = await res.json();
     window.APP_TOKEN = data.access_token;
-
-    const meRes = await fetch('/api/auth/me', {
-      headers: { 'Authorization': `Bearer ${window.APP_TOKEN}` }
-    });
-    if (meRes.ok) window.APP_USER = await meRes.json();
-
     return true;
   } catch (err) {
-    window.location.href = '/auth/connexion';
     return false;
   }
 }
 
-// Wrapper fetch qui ajoute automatiquement le token d'authentification
-function authFetch(url, options = {}) {
+// Appelé une seule fois au chargement de page
+async function bootstrapSession() {
+  const ok = await silentRefresh();
+  if (!ok) {
+    window.location.href = '/auth/connexion';
+    return false;
+  }
+  try {
+    const meRes = await fetch('/api/auth/me', {
+      headers: { 'Authorization': `Bearer ${window.APP_TOKEN}` }
+    });
+    if (meRes.ok) window.APP_USER = await meRes.json();
+  } catch (err) { /* non bloquant */ }
+  return true;
+}
+
+// Wrapper fetch avec retry automatique sur expiration de token (401)
+async function authFetch(url, options = {}, isRetry = false) {
   options.headers = Object.assign({}, options.headers, {
     'Authorization': `Bearer ${window.APP_TOKEN}`
   });
   options.credentials = 'include';
-  return fetch(url, options);
+
+  const res = await fetch(url, options);
+
+  if (res.status === 401 && !isRetry) {
+    const refreshed = await silentRefresh();
+    if (refreshed) {
+      return authFetch(url, options, true); // un seul retry, transparent
+    }
+    window.location.href = '/auth/connexion';
+  }
+
+  return res;
 }
 
 async function logoutUser() {
