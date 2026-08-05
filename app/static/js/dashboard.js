@@ -79,6 +79,23 @@ logoutLink?.addEventListener('click', (e) => {
 
 refreshBtn?.addEventListener('click', () => loadDashboard());
 
+let dashboardPollInterval = null;
+
+function startDashboardPolling() {
+  stopDashboardPolling();
+  dashboardPollInterval = setInterval(() => {
+    if (document.visibilityState === 'visible') loadDashboard();
+  }, 15000); // toutes les 15 secondes
+}
+
+function stopDashboardPolling() {
+  if (dashboardPollInterval) clearInterval(dashboardPollInterval);
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') loadDashboard();
+});
+
 (async function init() {
   const ok = await bootstrapSession();
   if (!ok) return;
@@ -86,4 +103,5 @@ refreshBtn?.addEventListener('click', () => loadDashboard());
     dashboardSubtitle.textContent = `Bonjour ${window.APP_USER.prenom}, mise à jour en cours...`;
   }
   await loadDashboard();
+  startDashboardPolling();
 })();
