@@ -103,8 +103,8 @@
 </div>
 
 <div class="toast" id="toast"></div>
-{% if current_app.config['GOOGLE_MAPS_API_KEY'] %}
-<script src="https://maps.googleapis.com/maps/api/js?key={{ current_app.config['GOOGLE_MAPS_API_KEY'] }}"></script>
+{% if config['GOOGLE_MAPS_API_KEY'] %}
+<script src="https://maps.googleapis.com/maps/api/js?key={{ config['GOOGLE_MAPS_API_KEY'] }}"></script>
 {% endif %}
 <script src="{{ url_for('static', filename='js/session-bootstrap.js') }}"></script>
 <script src="{{ url_for('static', filename='js/manager.js') }}"></script>
