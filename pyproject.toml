@@ -39,5 +39,9 @@ dependencies = [
 requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
+[tool.setuptools.packages.find]
+include = ["app*"]
+exclude = ["migrations*", "venv_prod*", "tests*"]
+
 [tool.vercel]
 entrypoint = "run:app"
