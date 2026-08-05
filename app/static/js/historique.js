@@ -88,8 +88,6 @@ sortSelect.addEventListener('change', () => {
 async function openTripDetail(id) {
   drawerOverlay.classList.add('show');
   document.getElementById('drawerDate').textContent = 'Chargement…';
-  document.getElementById('drawerRoute').innerHTML = '';
-  document.getElementById('drawerMapCanvas').innerHTML = '';
   document.getElementById('stopList').innerHTML = '';
 
   try {
@@ -116,98 +114,47 @@ async function openTripDetail(id) {
   }
 }
 
+let drawerLeafletMap = null;
+
 function drawRoute(positions) {
-  const canvas = document.getElementById('drawerMapCanvas');
-  const svg = document.getElementById('drawerRoute');
-
-  if (!positions || positions.length < 2) {
-    if (svg) svg.innerHTML = '';
-    if (canvas) canvas.innerHTML = '';
-    return;
+  if (drawerLeafletMap) {
+    drawerLeafletMap.remove();
+    drawerLeafletMap = null;
   }
 
-  if (window.google?.maps && canvas) {
-    if (svg) svg.style.display = 'none';
-    canvas.style.display = 'block';
-    canvas.innerHTML = '';
+  if (!positions || positions.length < 2) return;
 
-    const path = positions.map(p => ({ lat: p.lat, lng: p.lng }));
-    const bounds = new google.maps.LatLngBounds();
+  const latLngs = positions.map(p => [p.lat, p.lng]);
 
-    path.forEach(p => bounds.extend(p));
-    const map = new google.maps.Map(canvas, {
-      center: path[0],
-      zoom: 13,
-      disableDefaultUI: true,
-      gestureHandling: 'greedy'
-    });
+  drawerLeafletMap = L.map('drawerMap', {
+    zoomControl: false,
+    attributionControl: false
+  });
 
-    new google.maps.Polyline({
-      path,
-      geodesic: true,
-      strokeColor: '#ff7900',
-      strokeOpacity: 0.9,
-      strokeWeight: 5,
-      map
-    });
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19
+  }).addTo(drawerLeafletMap);
 
-    new google.maps.Marker({
-      position: path[0],
-      map,
-      icon: {
-        path: google.maps.SymbolPath.CIRCLE,
-        scale: 7,
-        fillColor: '#22c55e',
-        fillOpacity: 1,
-        strokeColor: '#fff',
-        strokeWeight: 2
-      }
-    });
+  const polyline = L.polyline(latLngs, { color: '#ff7900', weight: 4, opacity: 0.9 }).addTo(drawerLeafletMap);
 
-    new google.maps.Marker({
-      position: path[path.length - 1],
-      map,
-      icon: {
-        path: google.maps.SymbolPath.CIRCLE,
-        scale: 7,
-        fillColor: '#ff7900',
-        fillOpacity: 1,
-        strokeColor: '#fff',
-        strokeWeight: 2
-      }
-    });
+  const greenIcon = L.divIcon({
+    className: '',
+    html: '<div style="width:12px;height:12px;border-radius:50%;background:#22c55e;border:2px solid #fff;"></div>',
+    iconSize: [12, 12], iconAnchor: [6, 6]
+  });
+  const orangeIcon = L.divIcon({
+    className: '',
+    html: '<div style="width:12px;height:12px;border-radius:50%;background:#ff7900;border:2px solid #fff;"></div>',
+    iconSize: [12, 12], iconAnchor: [6, 6]
+  });
 
-    map.fitBounds(bounds);
-    return;
-  }
+  L.marker(latLngs[0], { icon: greenIcon }).addTo(drawerLeafletMap);
+  L.marker(latLngs[latLngs.length - 1], { icon: orangeIcon }).addTo(drawerLeafletMap);
 
-  if (svg) {
-    svg.style.display = 'block';
-    const lats = positions.map(p => p.lat);
-    const lngs = positions.map(p => p.lng);
-    const minLat = Math.min(...lats), maxLat = Math.max(...lats);
-    const minLng = Math.min(...lngs), maxLng = Math.max(...lngs);
-    const rangeLat = (maxLat - minLat) || 0.0001;
-    const rangeLng = (maxLng - minLng) || 0.0001;
-    const pad = 30;
-    const w = 400, h = 300;
+  drawerLeafletMap.fitBounds(polyline.getBounds(), { padding: [20, 20] });
 
-    const points = positions.map(p => {
-      const x = pad + ((p.lng - minLng) / rangeLng) * (w - pad * 2);
-      const y = h - pad - ((p.lat - minLat) / rangeLat) * (h - pad * 2);
-      return `${x.toFixed(1)},${y.toFixed(1)}`;
-    });
-
-    const pathD = 'M' + points.join(' L');
-    const [startX, startY] = points[0].split(',');
-    const [endX, endY] = points[points.length - 1].split(',');
-
-    svg.innerHTML = `
-      <path d="${pathD}" fill="none" stroke="#ff7900" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
-      <circle cx="${startX}" cy="${startY}" r="5" fill="#22c55e" stroke="#fff" stroke-width="2"/>
-      <circle cx="${endX}" cy="${endY}" r="5" fill="#ff7900" stroke="#fff" stroke-width="2"/>
-    `;
-  }
+  // essentiel : le drawer est masqué au moment de l'init, Leaflet calcule mal sa taille sans ce recalcul différé
+  setTimeout(() => { if (drawerLeafletMap) drawerLeafletMap.invalidateSize(); }, 100);
 }
 
 function renderStops(arrets) {

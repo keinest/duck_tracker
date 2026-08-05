@@ -10,6 +10,8 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/superviseur.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/manager.css') }}">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 </head>
 <body>
 
@@ -85,11 +87,7 @@
       <button class="icon-btn" id="managerDrawerClose"><i class="fa-solid fa-xmark"></i></button>
     </div>
     <div class="drawer-body">
-      <div class="map-visual" id="managerDrawerMap" style="height:240px;border-radius:14px;position:relative;">
-        <div id="managerMapCanvas" style="position:absolute;inset:0;"></div>
-        <div class="map-grid"></div>
-        <svg id="managerDrawerRoute" viewBox="0 0 400 300" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%;"></svg>
-      </div>
+      <div id="managerDrawerMap" style="height:240px;border-radius:14px;overflow:hidden;"></div>
       <div class="drawer-stats">
         <div class="drawer-stat"><i class="fa-solid fa-clock"></i><b id="managerDrawerDuree">--</b><span>Durée</span></div>
         <div class="drawer-stat"><i class="fa-solid fa-route"></i><b id="managerDrawerDistance">--</b><span>Distance</span></div>
@@ -103,9 +101,6 @@
 </div>
 
 <div class="toast" id="toast"></div>
-{% if config['GOOGLE_MAPS_API_KEY'] %}
-<script src="https://maps.googleapis.com/maps/api/js?key={{ config['GOOGLE_MAPS_API_KEY'] }}"></script>
-{% endif %}
 <script src="{{ url_for('static', filename='js/session-bootstrap.js') }}"></script>
 <script src="{{ url_for('static', filename='js/manager.js') }}"></script>
 </body>

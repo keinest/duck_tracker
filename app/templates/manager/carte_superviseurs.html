@@ -1,65 +1,71 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Carte superviseurs -- DUC Tracker</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/superviseur.css') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/manager.css') }}">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Carte superviseurs -- DUC Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/superviseur.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/manager.css') }}">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 </head>
 <body>
 
-<div class="dashboard-shell">
+  <div class="dashboard-shell">
   <nav class="side-nav">
-    <div class="side-brand">
-      <div class="mark"><i class="fa-solid fa-location-crosshairs"></i></div>
-      DUC <span class="sub">Tracker</span>
-    </div>
-    <a href="/manager/dashboard" class="nav-link"><i class="fa-solid fa-chart-simple"></i> Dashboard</a>
-    <a href="/manager/utilisateurs" class="nav-link"><i class="fa-solid fa-users"></i> Utilisateurs</a>
-    <a href="/manager/historique" class="nav-link"><i class="fa-solid fa-clock-rotate-left"></i> Historique</a>
-    <a href="/manager/carte" class="nav-link active"><i class="fa-solid fa-map-location-dot"></i> Carte superviseurs</a>
-    <div class="side-nav-footer">
-      <a href="#" id="logoutLink" class="nav-link"><i class="fa-solid fa-arrow-right-from-bracket"></i> Déconnexion</a>
-    </div>
+  <div class="side-brand">
+  <div class="mark"><i class="fa-solid fa-location-crosshairs"></i></div>
+        DUC <span class="sub">Tracker</span>
+  </div>
+  <a href="/manager/dashboard" class="nav-link"><i class="fa-solid fa-chart-simple"></i> Dashboard</a>
+  <a href="/manager/utilisateurs" class="nav-link"><i class="fa-solid fa-users"></i> Utilisateurs</a>
+  <a href="/manager/historique" class="nav-link"><i class="fa-solid fa-clock-rotate-left"></i> Historique</a>
+  <a href="/manager/carte" class="nav-link active"><i class="fa-solid fa-map-location-dot"></i> Carte superviseurs</a>
+  <div class="side-nav-footer">
+  <a href="#" id="logoutLink" class="nav-link"><i class="fa-solid fa-arrow-right-from-bracket"></i> Déconnexion</a>
+  </div>
   </nav>
 
   <div class="main-area">
-    <header class="topbar">
-      <div><h1>Carte des superviseurs</h1><div class="topbar-sub">Positions actives et dernières coordonnées reçues</div></div>
-    </header>
+  <header class="topbar">
+  <div><h1>Carte des superviseurs</h1><div class="topbar-sub">Positions actives et dernières coordonnées reçues</div></div>
+  </header>
 
-    <main class="content">
-      <div class="card">
-        <div class="card-head"><h3>Superviseurs en session active</h3><span class="tag">Vérifie l'état en direct</span></div>
-        <div class="table-responsive">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Superviseur</th>
-                <th>Région</th>
-                <th>Dernière mise à jour</th>
-                <th>Latitude</th>
-                <th>Longitude</th>
-                <th>Vitesse</th>
-              </tr>
-            </thead>
-            <tbody id="locationTableBody">
-              <tr><td colspan="6" class="empty-cell">Chargement des positions actives...</td></tr>
-            </tbody>
-          </table>
-        </div>
+  <main class="content">
+    <div class="card" style="padding:0;margin-bottom:16px;overflow:hidden;">
+      <div id="carteMap" style="height:420px;width:100%;"></div>
+    </div>
+
+  <div class="card">
+    <div class="card-head"><h3>Superviseurs en session active</h3><span class="tag">Vérifie l'état en direct</span></div>
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Superviseur</th>
+            <th>Région</th>
+            <th>Dernière mise à jour</th>
+            <th>Latitude</th>
+            <th>Longitude</th>
+            <th>Vitesse</th>
+          </tr>
+        </thead>
+        <tbody id="locationTableBody">
+          <tr><td colspan="6" class="empty-cell">Chargement des positions actives...</td></tr>
+        </tbody>
+      </table>
       </div>
+    </div>
     </main>
   </div>
-</div>
+  </div>
 
-<div class="toast" id="toast"></div>
-<script src="{{ url_for('static', filename='js/session-bootstrap.js') }}"></script>
-<script src="{{ url_for('static', filename='js/manager.js') }}"></script>
+  <div class="toast" id="toast"></div>
+  <script src="{{ url_for('static', filename='js/session-bootstrap.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/manager.js') }}"></script>
 </body>
 </html>
