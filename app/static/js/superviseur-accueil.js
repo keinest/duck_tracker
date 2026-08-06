@@ -4,9 +4,7 @@ let timerInterval = null;
 let watchId = null;
 let distanceCumulee = 0;
 let lastCoords = null;
-let arretsDetectes = 0;
-
-// ---------- Carte live + tracé ----------
+let lastCoordsTime = null;
 
 let liveMap = null;
 let liveMarker = null;
@@ -14,18 +12,18 @@ let livePolyline = null;
 let routeCoords = [];
 
 const toggleSwitch = document.getElementById('shareToggle');
-const shareBtn     = document.getElementById('shareBtn');
-const statusValue  = document.getElementById('statusValue');
-const statusDot    = document.getElementById('statusDot');
-const statusSub    = document.getElementById('statusSub');
+const shareBtn = document.getElementById('shareBtn');
+const statusValue = document.getElementById('statusValue');
+const statusDot = document.getElementById('statusDot');
+const statusSub = document.getElementById('statusSub');
 const sessionTimer = document.getElementById('sessionTimer');
 const sessionSince = document.getElementById('sessionSince');
-const coordBadge   = document.getElementById('coordBadge');
+const coordBadge = document.getElementById('coordBadge');
 const mapBadgeText = document.getElementById('mapBadgeText');
 const statDistance = document.getElementById('statDistance');
-const statVitesse  = document.getElementById('statVitesse');
-const statArrets   = document.getElementById('statArrets');
-const toast        = document.getElementById('toast');
+const statVitesse = document.getElementById('statVitesse');
+const statArrets = document.getElementById('statArrets');
+const toast = document.getElementById('toast');
 const activityList = document.getElementById('activityList');
 
 function showToast(message) {
@@ -46,7 +44,7 @@ function addActivity(icon, text, subtext) {
   if (empty && activityList.children.length === 1 && empty.querySelector('p').textContent.includes('Aucune activité')) {
     activityList.innerHTML = '';
   }
-  const item     = document.createElement('div');
+  const item = document.createElement('div');
   item.className = 'activity-item';
   item.innerHTML = `
     <div class="activity-icon"><i class="fa-solid ${icon}"></i></div>
@@ -68,7 +66,6 @@ function updateUI(active) {
     statusValue.textContent = 'Localisation active';
     statusDot.classList.remove('off');
     statusSub.textContent = 'Votre position est partagée';
-    mapBadgeText.textContent = 'Position active';
     shareBtn.className = 'share-btn stop';
     shareBtn.querySelector('.btn-text').textContent = 'Arrêter le partage';
   } else {
@@ -80,6 +77,7 @@ function updateUI(active) {
     shareBtn.querySelector('.btn-text').textContent = 'Démarrer le partage';
     sessionTimer.textContent = '00:00:00';
     sessionSince.textContent = '—';
+    statVitesse.textContent = '0 km/h';
   }
 }
 
@@ -138,7 +136,8 @@ function pushRoutePoint(lat, lng) {
   }
   liveMarker.setLatLng([lat, lng]);
   livePolyline.setLatLngs(routeCoords);
-  liveMap.panTo([lat, lng]);
+  // animate:false -> déplacement instantané, plus de décalage perceptible
+  liveMap.panTo([lat, lng], { animate: false });
 }
 
 function loadInitialRoute(positions) {
@@ -158,28 +157,63 @@ function startGeolocation() {
     showToast("La géolocalisation n'est pas disponible sur cet appareil.");
     return;
   }
+
+  mapBadgeText.textContent = 'Localisation en cours…';
+
+  // 1) Fix rapide et approximatif pour afficher la carte SANS attendre la haute précision
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      if (!liveMap) {
+        ensureLiveMap(pos.coords.latitude, pos.coords.longitude);
+        mapBadgeText.textContent = 'Position active';
+      }
+    },
+    () => {},
+    { enableHighAccuracy: false, timeout: 5000, maximumAge: 60000 }
+  );
+
+  // 2) Suivi continu en haute précision
   watchId = navigator.geolocation.watchPosition(
     (pos) => {
-      const { latitude, longitude, speed } = pos.coords;
+      const { latitude, longitude, accuracy } = pos.coords;
+      const now = Date.now();
       coordBadge.textContent = `${latitude.toFixed(4)}° N, ${longitude.toFixed(4)}° E`;
+      mapBadgeText.textContent = 'Position active';
 
-      const vitesseKmh = speed ? Math.round(speed * 3.6) : 0;
-      statVitesse.textContent = `${vitesseKmh} km/h`;
+      // Ignore les positions très imprécises (dérive GPS forte)
+      if (accuracy && accuracy > 60) {
+        return;
+      }
 
-      if (lastCoords) {
-        const d = haversine(lastCoords.lat, lastCoords.lng, latitude, longitude);
-        if (d < 5) {
-          distanceCumulee += d;
-          statDistance.textContent = `${distanceCumulee.toFixed(1)} km`;
+      let vitesseKmh = 0;
+
+      if (lastCoords && lastCoordsTime) {
+        const distanceKm = haversine(lastCoords.lat, lastCoords.lng, latitude, longitude);
+        const distanceM = distanceKm * 1000;
+        const elapsedS = (now - lastCoordsTime) / 1000;
+
+        // Ignore le bruit GPS : en dessous de 3m de déplacement, on considère l'utilisateur immobile
+        if (distanceM >= 3 && elapsedS > 0) {
+          vitesseKmh = Math.round((distanceM / elapsedS) * 3.6);
+          if (distanceKm < 5) {
+            distanceCumulee += distanceKm;
+            statDistance.textContent = `${distanceCumulee.toFixed(1)} km`;
+          }
+        } else {
+          vitesseKmh = 0;
         }
       }
+
+      statVitesse.textContent = `${vitesseKmh} km/h`;
+
       lastCoords = { lat: latitude, lng: longitude };
+      lastCoordsTime = now;
 
       pushRoutePoint(latitude, longitude);
       sendPosition(latitude, longitude, vitesseKmh);
     },
     () => showToast("Impossible d'accéder à votre position. Vérifiez les autorisations."),
-    { enableHighAccuracy: true, maximumAge: 10000 }
+    { enableHighAccuracy: true, maximumAge: 5000, timeout: 10000 }
   );
 }
 
@@ -188,6 +222,8 @@ function stopGeolocation() {
     navigator.geolocation.clearWatch(watchId);
     watchId = null;
   }
+  lastCoords = null;
+  lastCoordsTime = null;
 }
 
 let lastSent = 0;
@@ -247,7 +283,7 @@ async function toggleShare() {
   setLoading(true);
   try {
     if (!sessionActive) {
-      resetLiveMap(); // trajet vierge pour la nouvelle session
+      resetLiveMap();
       const res = await authFetch('/api/superviseur/session/start', { method: 'POST' });
       const data = await res.json();
       if (!res.ok) { showToast(data.message || 'Erreur au démarrage'); setLoading(false); return; }
