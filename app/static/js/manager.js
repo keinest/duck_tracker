@@ -136,7 +136,10 @@ function updateCarteMarkers(locations) {
       const marker = L.marker([loc.latitude, loc.longitude], { icon: makeSuperviseurIcon() })
         .addTo(carteMap)
         .bindPopup(popupHtml);
-      marker.on('click', () => openSessionDetail(loc.session_id));
+      marker.on('click', () => {
+        carteMap.closePopup();
+        openSessionDetail(loc.session_id);
+      });
       carteMarkers[loc.session_id] = marker;
     }
   });
