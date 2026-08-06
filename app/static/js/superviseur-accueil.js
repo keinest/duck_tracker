@@ -7,24 +7,25 @@ let lastCoords = null;
 let arretsDetectes = 0;
 
 // ---------- Carte live + tracé ----------
+
 let liveMap = null;
 let liveMarker = null;
 let livePolyline = null;
 let routeCoords = [];
 
 const toggleSwitch = document.getElementById('shareToggle');
-const shareBtn = document.getElementById('shareBtn');
-const statusValue = document.getElementById('statusValue');
-const statusDot = document.getElementById('statusDot');
-const statusSub = document.getElementById('statusSub');
+const shareBtn     = document.getElementById('shareBtn');
+const statusValue  = document.getElementById('statusValue');
+const statusDot    = document.getElementById('statusDot');
+const statusSub    = document.getElementById('statusSub');
 const sessionTimer = document.getElementById('sessionTimer');
 const sessionSince = document.getElementById('sessionSince');
-const coordBadge = document.getElementById('coordBadge');
+const coordBadge   = document.getElementById('coordBadge');
 const mapBadgeText = document.getElementById('mapBadgeText');
 const statDistance = document.getElementById('statDistance');
-const statVitesse = document.getElementById('statVitesse');
-const statArrets = document.getElementById('statArrets');
-const toast = document.getElementById('toast');
+const statVitesse  = document.getElementById('statVitesse');
+const statArrets   = document.getElementById('statArrets');
+const toast        = document.getElementById('toast');
 const activityList = document.getElementById('activityList');
 
 function showToast(message) {
@@ -45,7 +46,7 @@ function addActivity(icon, text, subtext) {
   if (empty && activityList.children.length === 1 && empty.querySelector('p').textContent.includes('Aucune activité')) {
     activityList.innerHTML = '';
   }
-  const item = document.createElement('div');
+  const item     = document.createElement('div');
   item.className = 'activity-item';
   item.innerHTML = `
     <div class="activity-icon"><i class="fa-solid ${icon}"></i></div>
@@ -208,11 +209,17 @@ async function sendPosition(lat, lng, vitesse) {
   lastSent = Date.now();
   lastSentCoords = { lat, lng };
   try {
-    await authFetch('/api/superviseur/position', {
+    const res = await authFetch('/api/superviseur/position', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ latitude: lat, longitude: lng, vitesse })
     });
+    if (res.ok) {
+      const data = await res.json();
+      if (typeof data.nb_arrets === 'number') {
+        statArrets.textContent = data.nb_arrets;
+      }
+    }
   } catch (err) {
     console.error('Envoi position échoué', err);
   }
@@ -226,6 +233,7 @@ async function checkActiveSession() {
       updateUI(true);
       startTimer(data.heure_debut);
       loadInitialRoute(data.positions);
+      if (typeof data.nb_arrets === 'number') statArrets.textContent = data.nb_arrets;
       startGeolocation();
     } else {
       updateUI(false);
