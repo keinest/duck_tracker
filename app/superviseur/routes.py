@@ -42,7 +42,7 @@ def reverse_geocode(lat, lng):
 
 # --- Paramètres de détection d'arrêt ---
 STOP_RADIUS_KM = 0.05       # 50 mètres
-MIN_STOP_SECONDS = 90       # durée minimale d'immobilité pour compter comme un arrêt
+MIN_STOP_SECONDS = 20       # durée minimale d'immobilité pour compter comme un arrêt
 
 
 def detect_and_manage_stop(session, current_lat, current_lng, current_time):
