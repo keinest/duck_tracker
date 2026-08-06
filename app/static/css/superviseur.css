@@ -35,6 +35,17 @@ a{color:inherit;text-decoration:none;}
   min-height:100vh;
 }
 
+.map-card{
+  position:relative;
+  height:210px;
+  border-radius:16px;
+  overflow:hidden;
+}
+#leafletMap{
+  border-radius:16px;
+}
+.leaflet-orange-pin{background:transparent;border:none;}
+
 /* ============ SIDEBAR (desktop) / BOTTOM NAV (mobile) ============ */
 .side-nav{
   width:224px;
@@ -326,7 +337,14 @@ a{color:inherit;text-decoration:none;}
     z-index:50;
     gap:0;
   }
-  .side-brand, .side-nav-footer{display:none;}
+  .side-brand{display:none;}
+  .side-nav-footer{
+    display:flex;
+    flex:1;
+    padding:0;
+    border-top:none;
+    margin-top:0;
+  }
   .nav-link{
     flex:1;flex-direction:column;gap:4px;
     padding:6px 4px;font-size:10px;text-align:center;
