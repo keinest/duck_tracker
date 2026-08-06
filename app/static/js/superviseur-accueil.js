@@ -6,6 +6,12 @@ let distanceCumulee = 0;
 let lastCoords = null;
 let arretsDetectes = 0;
 
+// ---------- Carte live + tracé ----------
+let liveMap = null;
+let liveMarker = null;
+let livePolyline = null;
+let routeCoords = [];
+
 const toggleSwitch = document.getElementById('shareToggle');
 const shareBtn = document.getElementById('shareBtn');
 const statusValue = document.getElementById('statusValue');
@@ -94,6 +100,58 @@ function haversine(lat1, lon1, lat2, lon2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
+// ---------- Carte live ----------
+function orangeDivIcon() {
+  return L.divIcon({
+    className: '',
+    html: '<div style="width:16px;height:16px;border-radius:50%;background:#ff7900;border:3px solid #fff;box-shadow:0 0 0 6px rgba(255,121,0,.22);"></div>',
+    iconSize: [16, 16],
+    iconAnchor: [8, 8]
+  });
+}
+
+function ensureLiveMap(lat, lng) {
+  if (liveMap) return;
+  liveMap = L.map('liveMap', { zoomControl: false, attributionControl: false }).setView([lat, lng], 16);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(liveMap);
+  liveMarker = L.marker([lat, lng], { icon: orangeDivIcon() }).addTo(liveMap);
+  livePolyline = L.polyline(routeCoords.length ? routeCoords : [[lat, lng]], { color: '#ff7900', weight: 4, opacity: 0.85 }).addTo(liveMap);
+  setTimeout(() => { if (liveMap) liveMap.invalidateSize(); }, 150);
+}
+
+function resetLiveMap() {
+  routeCoords = [];
+  if (liveMap) {
+    liveMap.remove();
+    liveMap = null;
+    liveMarker = null;
+    livePolyline = null;
+  }
+}
+
+function pushRoutePoint(lat, lng) {
+  routeCoords.push([lat, lng]);
+  if (!liveMap) {
+    ensureLiveMap(lat, lng);
+    return;
+  }
+  liveMarker.setLatLng([lat, lng]);
+  livePolyline.setLatLngs(routeCoords);
+  liveMap.panTo([lat, lng]);
+}
+
+function loadInitialRoute(positions) {
+  if (!positions || positions.length === 0) return;
+  routeCoords = positions.map(p => [p.lat, p.lng]);
+  const last = routeCoords[routeCoords.length - 1];
+  ensureLiveMap(last[0], last[1]);
+  livePolyline.setLatLngs(routeCoords);
+  if (routeCoords.length > 1) {
+    liveMap.fitBounds(livePolyline.getBounds(), { padding: [20, 20] });
+  }
+}
+
+// ---------- Géolocalisation ----------
 function startGeolocation() {
   if (!navigator.geolocation) {
     showToast("La géolocalisation n'est pas disponible sur cet appareil.");
@@ -109,16 +167,14 @@ function startGeolocation() {
 
       if (lastCoords) {
         const d = haversine(lastCoords.lat, lastCoords.lng, latitude, longitude);
-        if (d < 5) { // ignore sauts GPS aberrants
+        if (d < 5) {
           distanceCumulee += d;
           statDistance.textContent = `${distanceCumulee.toFixed(1)} km`;
-        }
-        if (vitesseKmh < 2 && d < 0.01) {
-          // immobile -> pourrait être un arrêt (logique simplifiée pour l'aperçu live)
         }
       }
       lastCoords = { lat: latitude, lng: longitude };
 
+      pushRoutePoint(latitude, longitude);
       sendPosition(latitude, longitude, vitesseKmh);
     },
     () => showToast("Impossible d'accéder à votre position. Vérifiez les autorisations."),
@@ -134,10 +190,23 @@ function stopGeolocation() {
 }
 
 let lastSent = 0;
-async function sendPosition(lat, lng, vitesse) {
+let lastSentCoords = null;
+
+function shouldSendPosition(lat, lng) {
   const now = Date.now();
-  if (now - lastSent < 30000) return;
-  lastSent = now;
+  const timeElapsed = now - lastSent;
+  if (timeElapsed >= 10000) return true;
+  if (lastSentCoords) {
+    const distanceM = haversine(lastSentCoords.lat, lastSentCoords.lng, lat, lng) * 1000;
+    if (distanceM >= 8) return true;
+  }
+  return false;
+}
+
+async function sendPosition(lat, lng, vitesse) {
+  if (!shouldSendPosition(lat, lng)) return;
+  lastSent = Date.now();
+  lastSentCoords = { lat, lng };
   try {
     await authFetch('/api/superviseur/position', {
       method: 'POST',
@@ -156,6 +225,7 @@ async function checkActiveSession() {
     if (data.active) {
       updateUI(true);
       startTimer(data.heure_debut);
+      loadInitialRoute(data.positions);
       startGeolocation();
     } else {
       updateUI(false);
@@ -169,6 +239,7 @@ async function toggleShare() {
   setLoading(true);
   try {
     if (!sessionActive) {
+      resetLiveMap(); // trajet vierge pour la nouvelle session
       const res = await authFetch('/api/superviseur/session/start', { method: 'POST' });
       const data = await res.json();
       if (!res.ok) { showToast(data.message || 'Erreur au démarrage'); setLoading(false); return; }
@@ -209,7 +280,6 @@ document.getElementById('logoutLink').addEventListener('click', (e) => {
   logoutUser();
 });
 
-// ---------- Date du jour ----------
 function renderTodayDate() {
   const jours = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
   const mois = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
@@ -218,13 +288,12 @@ function renderTodayDate() {
     `${jours[now.getDay()]} ${now.getDate()} ${mois[now.getMonth()]} ${now.getFullYear()}`;
 }
 
-// ---------- Aperçu de la semaine (données d'exemple en attendant l'historique réel) ----------
 function renderWeekChart() {
   const jours = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
-  const valeurs = [18, 24, 12, 30, 22, 8, 0]; // km, exemple — sera remplacé par les vraies données d'historique
+  const valeurs = [18, 24, 12, 30, 22, 8, 0];
   const max = Math.max(...valeurs, 1);
   const container = document.getElementById('weekChart');
-  const todayIndex = (new Date().getDay() + 6) % 7; // lundi = 0
+  const todayIndex = (new Date().getDay() + 6) % 7;
 
   container.innerHTML = valeurs.map((v, i) => `
     <div class="week-bar ${i === todayIndex ? 'today' : ''}">

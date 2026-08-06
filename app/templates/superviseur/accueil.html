@@ -3,22 +3,23 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Accueil -- DUC Tracker</title>
+<title>Accueil — Orange Field Tracker</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/superviseur.css') }}">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 </head>
 <body>
 
 <div class="dashboard-shell">
 
-  <!-- ============ NAV (sidebar desktop / bottom nav mobile) ============ -->
   <nav class="side-nav">
     <div class="side-brand">
       <div class="mark"><i class="fa-solid fa-location-crosshairs"></i></div>
-      DUC <span class="sub">&nbsp;Tracker</span>
+      Orange <span class="sub">&nbsp;Field Tracker</span>
     </div>
 
     <a href="{{ url_for('superviseur_views.accueil') }}" class="nav-link active">
@@ -38,12 +39,11 @@
     </div>
   </nav>
 
-  <!-- ============ CONTENU ============ -->
   <div class="main-area">
     <header class="topbar">
       <div>
         <h1 id="greeting">Accueil</h1>
-        <div class="topbar-sub" id="todayDate">--</div>
+        <div class="topbar-sub" id="todayDate">—</div>
       </div>
       <div class="topbar-actions">
         <button class="icon-btn"><i class="fa-solid fa-bell"></i></button>
@@ -52,7 +52,6 @@
 
     <main class="content">
 
-      <!-- Ligne stats -->
       <div class="stats-row">
         <div class="card status-card mini-stat-card">
           <div class="status-left">
@@ -88,16 +87,14 @@
         </div>
       </div>
 
-      <!-- Carte + session -->
       <div class="two-col">
         <div class="card map-card">
-          <div class="map-visual">
-            <div class="map-grid"></div>
-            <div class="map-pin"></div>
+          <div class="map-visual" id="mapVisual">
+            <div id="liveMap" style="position:absolute;inset:0;"></div>
           </div>
           <div class="map-footer">
-            <span class="coord" id="coordBadge">--, --</span>
-            <span class="badge"><span class="d"></span> <span id="mapBadgeText">Position inactive</span></span>
+            <span class="coord" id="coordBadge">—, —</span>
+            <span class="badge" id="mapStatusBadge"><span class="d"></span> <span id="mapBadgeText">Position inactive</span></span>
           </div>
         </div>
 
@@ -109,7 +106,7 @@
           <div class="session-timer-block">
             <div class="label">Durée de la session</div>
             <div class="session-timer" id="sessionTimer">00:00:00</div>
-            <div class="session-since" id="sessionSince">--</div>
+            <div class="session-since" id="sessionSince">—</div>
           </div>
           <button class="share-btn start" id="shareBtn">
             <span class="spinner"></span>
@@ -118,7 +115,6 @@
         </div>
       </div>
 
-      <!-- Aperçu semaine + activité -->
       <div class="two-col">
         <div class="card">
           <div class="card-head">

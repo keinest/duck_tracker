@@ -19,10 +19,18 @@ def session_active():
     session = SessionPartage.query.filter_by(user_id=user_id, statut_session='active').first()
     if not session:
         return jsonify({'active': False}), 200
+
+    positions = (Position.query.filter_by(session_id=session.id)
+                 .order_by(Position.horodatage.asc()).all())
+    if len(positions) > 200:
+        step = max(1, len(positions) // 200)
+        positions = positions[::step]
+
     return jsonify({
         'active': True,
         'session_id': session.id,
-        'heure_debut': session.heure_debut.isoformat()
+        'heure_debut': session.heure_debut.isoformat(),
+        'positions': [{'lat': float(p.latitude), 'lng': float(p.longitude)} for p in positions]
     }), 200
 
 
