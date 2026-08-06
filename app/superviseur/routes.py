@@ -162,7 +162,6 @@ def session_stop():
     db.session.commit()
     return jsonify({'message': 'Session terminée'}), 200
 
-
 @superviseur_bp.route('/position', methods=['POST'])
 @jwt_required()
 def add_position():
@@ -201,13 +200,21 @@ def add_position():
     if data.get('vitesse', 0) > (session.vitesse_max or 0):
         session.vitesse_max = data['vitesse']
 
-    db.session.flush()  # rend la position visible aux requêtes suivantes de cette même transaction
-
-    detect_and_manage_stop(session, float(data['latitude']), float(data['longitude']), now)
-
-    db.session.commit()
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'message': 'Erreur lors de l\'enregistrement de la position'}), 500
 
     nb_arrets = PointArret.query.filter_by(session_id=session.id).count()
+    try:
+        detect_and_manage_stop(session, float(data['latitude']), float(data['longitude']), now)
+        db.session.commit()
+        nb_arrets = PointArret.query.filter_by(session_id=session.id).count()
+    except Exception as e:
+        db.session.rollback()
+        print(f"[detect_and_manage_stop] erreur non bloquante: {e}")
+
     return jsonify({'message': 'Position enregistrée', 'nb_arrets': nb_arrets}), 201
 
 
