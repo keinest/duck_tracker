@@ -351,3 +351,30 @@
     gap: 10px;
   }
 }
+
+@media (max-width: 1040px) {
+  .manager-stats-row {
+    grid-template-columns: repeat(3, minmax(140px, 1fr));
+  }
+}
+
+@media (max-width: 860px) {
+  .manager-stats-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .manager-stats-row .metric-card:first-child {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 420px) {
+  .manager-stats-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .drawer-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
