@@ -8,6 +8,7 @@ from app.models.position import SessionPartage, Position, PointArret
 from app.api.schemas import CreateUserByAdminSchema
 from app.utils.decorators import role_required
 from sqlalchemy import extract
+from app.utils.session_cleanup import close_stale_sessions
 
 manager_bp = Blueprint('manager', __name__, url_prefix='/api/manager')
 
@@ -81,6 +82,7 @@ def toggle_statut_utilisateur(user_id):
 @manager_bp.route('/dashboard', methods=['GET'])
 @role_required('manager_regional', 'manager_national', 'admin')
 def dashboard_summary():
+    close_stale_sessions()
     claims = get_jwt()
     role = claims.get('role')
     region = claims.get('region')
@@ -229,6 +231,7 @@ def session_detail(session_id):
 @manager_bp.route('/locations', methods=['GET'])
 @role_required('manager_regional', 'manager_national', 'admin')
 def active_locations():
+    close_stale_sessions()
     claims = get_jwt()
     role = claims.get('role')
     region = claims.get('region')

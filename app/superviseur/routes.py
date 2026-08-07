@@ -8,7 +8,7 @@ from math import radians, sin, cos, sqrt, atan2
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.extensions import db
 from app.models.position import SessionPartage, Position, PointArret
-
+from app.utils.session_cleanup import close_stale_sessions
 
 def haversine_km(lat1, lon1, lat2, lon2):
     R = 6371
@@ -99,6 +99,7 @@ superviseur_bp = Blueprint('superviseur', __name__, url_prefix='/api/superviseur
 @superviseur_bp.route('/session/active', methods=['GET'])
 @jwt_required()
 def session_active():
+    close_stale_sessions()
     user_id = get_jwt_identity()
     session = SessionPartage.query.filter_by(user_id=user_id, statut_session='active').first()
     if not session:
