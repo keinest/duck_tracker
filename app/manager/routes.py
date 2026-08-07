@@ -8,7 +8,9 @@ from app.models.position import SessionPartage, Position, PointArret
 from app.api.schemas import CreateUserByAdminSchema
 from app.utils.decorators import role_required
 from sqlalchemy import extract
+
 from app.utils.session_cleanup import close_stale_sessions
+from app.utils.helpers import normalize_telephone
 
 manager_bp = Blueprint('manager', __name__, url_prefix='/api/manager')
 
@@ -45,7 +47,11 @@ def create_utilisateur():
     if not data:
         return jsonify({'message': 'Requete invalide'}), 400
 
+    if 'telephone' in data:
+        data['telephone'] = normalize_telephone(data['telephone'])
+
     schema = CreateUserByAdminSchema()
+    
     try:
         validated = schema.load(data)
     except ValidationError as err:

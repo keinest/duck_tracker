@@ -10,6 +10,8 @@ from app.models.user import User
 from marshmallow import ValidationError
 from app.api.schemas import RegisterSchema
 
+from app.utils.helpers import normalize_telephone
+
 auth_bp = Blueprint('auth', __name__, url_prefix='/api/auth')
 
 @auth_bp.route('/login', methods = ['POST'])
@@ -19,13 +21,13 @@ def login():
     if not data:
         return jsonify({'message': 'Requête invalide'}), 400
 
-    telephone    = data.get('telephone')
+    telephone = normalize_telephone(data.get('telephone'))
     mot_de_passe = data.get('mot_de_passe')
 
     if not telephone or not mot_de_passe:
         return jsonify({'message': 'Téléphone et mot de passe requis'}), 400
 
-    user = User.query.filter_by(telephone = telephone).first()
+    user = User.query.filter_by(telephone=telephone).first()
 
     if not user or not user.check_password(mot_de_passe):
         return jsonify({'message': 'Identifiants incorrects'}), 401
@@ -157,6 +159,9 @@ def register():
     data = request.get_json(silent=True)
     if not data:
         return jsonify({'message': 'Requête invalide'}), 400
+    
+    if 'telephone' in data:
+        data['telephone'] = normalize_telephone(data['telephone'])
 
     schema = RegisterSchema()
     try:
