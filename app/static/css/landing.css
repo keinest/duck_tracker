@@ -530,4 +530,27 @@ footer{
   .nav-links{display:none;}
   .cta-band{padding:36px;flex-direction:column;align-items:flex-start;}
   .footer-top{flex-direction:column;}
+
+  nav{
+    padding:12px 16px;
+    gap:10px;
+  }
+  .brand{font-size:14.5px;gap:8px;}
+  .brand-mark{width:26px;height:26px;border-radius:7px;}
+  .brand-mark i{font-size:12px;}
+  .nav-cta{gap:8px;}
+  .nav-cta .btn{
+    padding:8px 12px;
+    font-size:12.5px;
+    white-space:nowrap;
+  }
+}
+
+@media (max-width:380px)
+{
+  nav{padding:10px 12px;}
+  .brand span.sub{display:none;}
+  .nav-cta .btn-ghost{
+    padding:8px 10px;
+  }
 }
