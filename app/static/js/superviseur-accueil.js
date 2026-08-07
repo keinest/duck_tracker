@@ -181,7 +181,7 @@ function startGeolocation() {
       mapBadgeText.textContent = 'Position active';
 
       // Ignore les positions très imprécises (dérive GPS forte)
-      if (accuracy && accuracy > 60) {
+      if (accuracy && accuracy > 500) {
         return;
       }
 
