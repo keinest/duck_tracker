@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from app.extensions import db
 from app.models.position import SessionPartage, Position
 
-STALE_SESSION_THRESHOLD_SECONDS = 180  # 3 minutes sans nouvelle position = session abandonnée
+STALE_SESSION_THRESHOLD_SECONDS = 300 
 
 
 def close_stale_sessions():
